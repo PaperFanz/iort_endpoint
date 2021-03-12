@@ -27,6 +27,7 @@ static const char* TAG = "MSG";
 volatile xQueueHandle xMsgQueue;
 
 char* msg_jsonify(iot_msg_t *msg){
+    //these sizes are pretty wishy-washy
     static char json_string[IOT_MSG_KEY_SIZE + IOT_MSG_DATA_SIZE + 100];
     char payload[IOT_MSG_DATA_SIZE + 5];
 
@@ -61,10 +62,6 @@ void msg_sender(void *param){
     
     for(;;){
         
-        if(xMsgQueue == NULL){
-            ESP_LOGI(TAG, "Queue is fucked\n");
-        }
-        
         if(xQueueReceive(xMsgQueue, (void *) &rx_msg, ( TickType_t ) 10)){
             ESP_LOGI(TAG, "Recieve %s %s\n", rx_msg->key, rx_msg->data);
             mqtt_publish(topic, msg_jsonify(rx_msg)); 
@@ -84,13 +81,10 @@ void msg_create(void *param){
 
         ESP_LOGI(TAG, "Send %s %s \n", messages[i].key, messages[i].data);
 
-        if(xMsgQueue == NULL){
-            ESP_LOGI(TAG, "Queue is fucked\n");
-        }
-
+        //for some reason the xQueueSend requires it be a pointer to a pointer
         iot_msg_t *temp = &(messages[i]);
-
         xQueueSend(xMsgQueue, (void *) &temp, (TickType_t) 10); 
+        //send 16 messages, 1 second apart
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 
@@ -105,13 +99,8 @@ void msg_init(){
     mqtt_init();
 
     xMsgQueue = init_msg_queue();
-
-    if(xMsgQueue == NULL){
-        ESP_LOGI(TAG, "Queue is fucked\n");
-    }
-
-
-    xTaskCreate(&msg_sender, "msg_sender", 20000, NULL, 5, NULL);
+    
+    xTaskCreate(&msg_sender, "msg_sender", 20000, NULL, 5, NULL); //something is very wrong with the stack sizes, I honestly have no idea what I am doing here
     xTaskCreate(&msg_create, "msg_create", 9216, NULL, 4, NULL);
 
 }
