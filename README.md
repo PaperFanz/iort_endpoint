@@ -1,5 +1,4 @@
-
-This project uses the amazon embedded sdk (https://github.com/aws/aws-iot-device-sdk-embedded-C) to implement mqtt communication to IoT Core. At the moment, the program puts dummy data into a FreeRTOS queue and sends it to IoT Core. 
+This project uses the amazon embedded sdk (https://github.com/aws/aws-iot-device-sdk-embedded-C) to implement mqtt communication to IoT Core. At the moment, the program puts dummy data into a FreeRTOS queue and sends it to IoT Core. The stack allocation is wack though, and the program will fail pretty often. TODO.
 
 
 Setting up the project:
