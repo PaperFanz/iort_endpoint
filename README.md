@@ -8,6 +8,8 @@ Setting up the project:
 
 -Change FreeRTOS headers from #include <*.h> -> include "freertos/*.h" 
 
+-Set WIFI SSID and password in "msg_mqtt.c"
+
 How to build and flash:
 
 -Make sure that the following lines are in your .bashrc:

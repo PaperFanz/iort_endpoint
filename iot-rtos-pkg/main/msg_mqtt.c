@@ -50,7 +50,7 @@
 
 
 #define WIFI_SSID "#YangGang2.4"
-#define WIFI_PASSWORD "automation"
+#define WIFI_PASSWORD ""
 #define AWS_CLIENT_ID "myesp32"
 
 static const char *TAG = "subpub";
