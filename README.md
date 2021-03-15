@@ -67,5 +67,6 @@ What I've done so far:
 
 -I have also tried to simply copy the mbedtls folder from this repo's components to the other repo's components, but no luck
 
+# Pete's notes 3/15
 
-
+After trying (unsuccesfully) to add aws-iot-device-sdk-embedded-c I decided to just move everything we have into this repository. I renamed the repository to reflect the move to the new SDK and restructured it to make the move easier. The changes are reflected in `endpoint-package/main/CMakeLists.txt` and builds/runs as of commit f765580da9283406d3a8c6a792d43b9f7d6047f7.
