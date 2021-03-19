@@ -3,11 +3,15 @@ set(SRCS
     src/msg_mqtt.c
     src/msg_queue.c
     src/msg.c
+    src/analog.c
+    src/main.c
 )
 
 set(INCS
+    inc/config.h
     inc/msg_mqtt.h
     inc/msg_queue.h
+    inc/analog.h
 )
 
 set(LIBS

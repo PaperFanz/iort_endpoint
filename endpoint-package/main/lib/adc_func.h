@@ -24,7 +24,7 @@
 
 void adc_init();
 void setup_adc(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_bits_width_t width);
-int read_adc1_raw(adc_channel_t channel);
+uint32_t read_adc1_raw(adc_channel_t channel);
 int read_adc1_voltage(adc_channel_t channel);
 int read_adc2_raw(adc_channel_t channel);
 int read_adc2_voltage(adc_channel_t channel);

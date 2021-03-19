@@ -11,6 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+
 typedef enum ros_msg_type {
     BOOL,
     INT64,
@@ -29,7 +33,7 @@ typedef union iot_data {
 } iot_data_t;
 
 typedef struct iot_msg {
-    char key [IOT_MSG_KEY_SIZE];
+    char * key;
     ros_msg_t type;
     iot_data_t data;
 } iot_msg_t;

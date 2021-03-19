@@ -37,14 +37,8 @@
 #ifndef __QRCODE_H_
 #define __QRCODE_H_
 
-#ifndef __cplusplus
-typedef unsigned char bool;
-static const bool false = 0;
-static const bool true = 1;
-#endif
-
 #include <stdint.h>
-
+#include <stdbool.h>
 
 // QR Code Format Encoding
 #define MODE_NUMERIC        0
@@ -62,7 +56,7 @@ static const bool true = 1;
 // If set to non-zero, this library can ONLY produce QR codes at that version
 // This saves a lot of dynamic memory, as the codeword tables are skipped
 #ifndef LOCK_VERSION
-#define LOCK_VERSION       0
+#define LOCK_VERSION 3
 #endif
 
 

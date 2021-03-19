@@ -14,7 +14,7 @@
 #define DEBUG_INFO  4
 #define DEBUG_ALL  UINT_MAX
 
-#define DEBUG_LOG_LEVEL DEBUG_ALL
+#define DEBUG_LOG_LEVEL DEBUG_DEBUG
 #define DEBUG 1
 
 void printdf(unsigned level, const char* format, ...);

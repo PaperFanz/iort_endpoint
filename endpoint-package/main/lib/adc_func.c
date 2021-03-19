@@ -109,7 +109,7 @@ void setup_adc(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_bi
 
 }
 
-int read_adc1_raw(adc_channel_t channel){
+uint32_t read_adc1_raw(adc_channel_t channel){
     
     uint32_t adc1_reading = 0;
     //Multisampling

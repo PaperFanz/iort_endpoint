@@ -24,6 +24,7 @@
 
 #include "epd.h"
 #include "epdgl.h"
+#include "qrcode.h"
 
 static const char* TAG = "MSG";
 
@@ -109,26 +110,23 @@ void msg_init(){
 
 }
 
-text_config_t txt_cfg = {
-    .color = EPD_WHITE,
-    .font = &Consolas20,
-};
+// void app_main()
+// {
+//     // initialize display
+//     epd_init();
+//     epdgl_init();
 
-void app_main()
-{
-    // initialize display
-    epd_init();
-    epdgl_init();
+//     display_qr();
 
-    // Initialize NVS.
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
+//     // Initialize NVS.
+//     esp_err_t err = nvs_flash_init();
+//     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+//         ESP_ERROR_CHECK(nvs_flash_erase());
+//         err = nvs_flash_init();
+//     }
+//     ESP_ERROR_CHECK( err );
 
-    msg_init(); 
-}
+//     msg_init(); 
+// }
 
 
