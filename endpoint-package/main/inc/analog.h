@@ -32,12 +32,13 @@ typedef enum channel {
 } channel_id_t;
 
 typedef enum soft_avg {
-    NONE,
-    X2,
-    X4,
-    X16,
-    X32,
-    X64,
+    NONE = 1,
+    X2 = 2,
+    X4 = 4,
+    X8 = 8,
+    X16 = 16,
+    X32 = 32,
+    X64 = 64,
 } soft_avg_t;
 
 typedef struct analog_ch {
@@ -54,7 +55,7 @@ typedef struct analog_ch {
         args: channel_id_t id - this channel's id
         ret: uint32_t sample
     */
-    uint32_t (* sampling_func)(channel_id_t);
+    uint32_t (* sampling_func)(channel_id_t, soft_avg_t);
 
     /*
         format data as you'd like for the iot message
@@ -72,7 +73,7 @@ analog_err_t init_channel(channel_id_t ch, char * key, ros_msg_t type, TickType_
 
 analog_err_t shutdown_channel(channel_id_t ch);
 
-analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t));
+analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t, soft_avg_t));
 
 analog_err_t set_formatting_func(channel_id_t ch, void (* f)(iot_msg_t *, uint32_t));
 

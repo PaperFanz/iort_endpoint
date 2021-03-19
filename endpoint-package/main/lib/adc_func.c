@@ -109,11 +109,11 @@ void setup_adc(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_bi
 
 }
 
-uint32_t read_adc1_raw(adc_channel_t channel){
+uint32_t read_adc1_raw(adc_channel_t channel, uint32_t avg){
     
     uint32_t adc1_reading = 0;
     //Multisampling
-    for (int i = 0; i < NO_OF_SAMPLES; i++) {
+    for (int i = 0; i < avg; i++) {
         int raw = adc1_get_raw((adc1_channel_t)channel);
         
         if(raw < 0){
@@ -125,7 +125,7 @@ uint32_t read_adc1_raw(adc_channel_t channel){
 
     }
 
-    adc1_reading /= NO_OF_SAMPLES;
+    adc1_reading /= avg;
 
     printdf(DEBUG_INFO, "Read %d on ADC1 channel %d\n", adc1_reading, channel);
 
@@ -133,7 +133,7 @@ uint32_t read_adc1_raw(adc_channel_t channel){
 }
 
 uint32_t read_adc1_voltage(adc_channel_t channel){
-    int raw = read_adc1_raw(channel);
+    int raw = read_adc1_raw(channel, 64);
     
     if(raw < 0){
         return -1;

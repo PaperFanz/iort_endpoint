@@ -21,9 +21,9 @@ static const adc_channel_t id_to_channel_remap[ANALOG_CHANNEL_NUM] = {
 
 static volatile xQueueHandle iotMsgQueue;
 
-uint32_t default_sampling_func(channel_id_t id)
+uint32_t default_sampling_func(channel_id_t id, soft_avg_t avg)
 {
-    return read_adc1_raw(id_to_channel_remap[id]);
+    return read_adc1_raw(id_to_channel_remap[id], avg);
 }
 
 void default_formatting_func(iot_msg_t * msg, uint32_t sample)
@@ -58,11 +58,9 @@ void analog_task(void * param)
     for (;;) {
         vTaskDelayUntil(&lastLoopTime, ch->rate);
 
-        ch->sample = ch->sampling_func(ch->id);
+        ch->sample = ch->sampling_func(ch->id, ch->avg);
         ch->formatting_func(&ch->msg, ch->sample);
 
-
-        ESP_LOGI("MSG", "Send %s %d\n", ch->msg.key, ch->sample);
         xQueueSend(iotMsgQueue, (void *) &ch->msg, (TickType_t) 10);
     }
 }
@@ -74,7 +72,7 @@ void analog_init(xQueueHandle msgQueue)
     adc_init();
     for (int i = 0; i < ANALOG_CHANNEL_NUM; ++i) {
         channels[i].id = i;
-        channels[i].avg = NONE;
+        channels[i].avg = X64;
         channels[i].sampling_func = &default_sampling_func;
         channels[i].formatting_func = &default_formatting_func;
         setup_adc(ADC_UNIT_1, 
@@ -116,7 +114,7 @@ analog_err_t shutdown_channel(channel_id_t ch)
     return ANALOG_OK;
 }
 
-analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t))
+analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t, soft_avg_t))
 {
     if (ch >= ANALOG_CHANNEL_NUM) return INVALID_CHANNEL;
     channels[ch].sampling_func = f;

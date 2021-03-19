@@ -44,15 +44,16 @@ void display_qr(void)
     QRCode qr;
     uint8_t qrbuf[qrcode_getBufferSize(3)];
 
-    qrcode_initText(&qr, qrbuf, 3, ECC_QUARTILE, "aws-iot-dev");
+    qrcode_initText(&qr, qrbuf, 3, ECC_QUARTILE, "WE <3 VENKATA");
 
     int sq = 300 / qr.size;
+    int vm = (300 - (sq * qr.size)) / 2;
     for (uint8_t y = 0; y < qr.size; y++) {
         for (uint8_t x = 0; x < qr.size; x++) {
             if (qrcode_getModule(&qr, x, y)) {
-                epdgl_fill_rect(50+(x*sq), (y*sq), sq, sq, EPD_BLACK);
+                epdgl_fill_rect(50+(x*sq), vm + (y*sq), sq, sq, EPD_BLACK);
             } else {
-                epdgl_fill_rect(50+(x*sq), (y*sq), sq, sq, EPD_WHITE);
+                epdgl_fill_rect(50+(x*sq), vm + (y*sq), sq, sq, EPD_WHITE);
             }
         }
     }
@@ -60,12 +61,25 @@ void display_qr(void)
     while (!epdgl_update_screen(EPD_SLOW)) vTaskDelay(10);
 }
 
+void consumer(void * param)
+{
+    xQueueHandle queue = (xQueueHandle) param;
+
+    iot_msg_t msg;
+
+    for (;;) {
+        if (xQueueReceive(queue, (void *) &msg, (TickType_t) 10)) {
+            ESP_LOGI("consumer", "got %lld from %s\n", msg.data.i64, msg.key);
+        }
+        vTaskDelay(10);
+    }
+}
+
 void app_main(void)
 {
     // initialize display
     epd_init();
     epdgl_init();
-
     display_qr();
 
     // Initialize NVS.
@@ -80,5 +94,16 @@ void app_main(void)
 
     analog_init(iotMsgQueue);
 
+    xTaskCreate(
+        &consumer,
+        "consumer",
+        configMINIMAL_STACK_SIZE * 4,
+        (void *) iotMsgQueue,
+        4,
+        NULL
+    );
+
     init_channel(CH0, "channel 0", INT64, taskHz(1));
+
+    init_channel(CH1, "channel 1", INT64, taskHz(4));
 }
