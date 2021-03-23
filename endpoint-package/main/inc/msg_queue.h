@@ -11,6 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+
 typedef enum ros_msg_type {
     BOOL,
     INT64,
@@ -18,13 +22,20 @@ typedef enum ros_msg_type {
     STRING
 } ros_msg_t;
 
-#define IOT_MSG_KEY_SIZE 64     // adjustable depending on memory usage
-#define IOT_MSG_DATA_SIZE 128   // adjustable, but no smaller than 4
+#define IOT_MSG_KEY_SIZE 64
+#define IOT_MSG_DATA_SIZE 128
+
+typedef union iot_data {
+    int64_t i64;
+    double f64;
+    bool b;
+    char s[IOT_MSG_DATA_SIZE];
+} iot_data_t;
 
 typedef struct iot_msg {
-    char key [IOT_MSG_KEY_SIZE];
+    char * key;
     ros_msg_t type;
-    uint8_t data[IOT_MSG_DATA_SIZE];
+    iot_data_t data;
 } iot_msg_t;
 
 xQueueHandle init_msg_queue(void);

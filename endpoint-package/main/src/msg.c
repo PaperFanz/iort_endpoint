@@ -22,6 +22,10 @@
 #include "msg_mqtt.h"
 #include "msg_queue.h"
 
+#include "epd.h"
+#include "epdgl.h"
+#include "qrcode.h"
+
 static const char* TAG = "MSG";
 
 volatile xQueueHandle xMsgQueue;
@@ -36,7 +40,7 @@ char* msg_jsonify(iot_msg_t *msg){
             sprintf(payload, "%s", get_bool_msg(msg) ? "true" : "false");
             break;
         case INT64:
-            sprintf(payload, "%" PRId64, get_int_msg(msg)); 
+            sprintf(payload, "%lld", get_int_msg(msg)); 
             break;
         case FLOAT64:
             sprintf(payload, "%f", get_float_msg(msg));
@@ -63,7 +67,7 @@ void msg_sender(void *param){
     for(;;){
         
         if(xQueueReceive(xMsgQueue, (void *) &rx_msg, ( TickType_t ) 10)){
-            ESP_LOGI(TAG, "Recieve %s %s\n", rx_msg->key, rx_msg->data);
+            ESP_LOGI(TAG, "Recieve %s %s\n", rx_msg->key, rx_msg->data.s);
             mqtt_publish(topic, msg_jsonify(rx_msg)); 
         }
     }
@@ -79,13 +83,13 @@ void msg_create(void *param){
         messages[i].type = STRING;
         set_string_msg(&(messages[i]), "test");
 
-        ESP_LOGI(TAG, "Send %s %s \n", messages[i].key, messages[i].data);
+        ESP_LOGI(TAG, "Send %s %s \n", messages[i].key, messages[i].data.s);
 
         //for some reason the xQueueSend requires it be a pointer to a pointer
         iot_msg_t *temp = &(messages[i]);
         xQueueSend(xMsgQueue, (void *) &temp, (TickType_t) 10); 
         //send 16 messages, 1 second apart
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(100);
     }
 
 
@@ -100,22 +104,29 @@ void msg_init(){
 
     xMsgQueue = init_msg_queue();
     
-    xTaskCreate(&msg_sender, "msg_sender", 20000, NULL, 5, NULL); //something is very wrong with the stack sizes, I honestly have no idea what I am doing here
+    xTaskCreate(&msg_sender, "msg_sender", 20000, NULL, 5, NULL);
+    //something is very wrong with the stack sizes, I honestly have no idea what I am doing here
     xTaskCreate(&msg_create, "msg_create", 9216, NULL, 4, NULL);
 
 }
 
-void app_main(){
+// void app_main()
+// {
+//     // initialize display
+//     epd_init();
+//     epdgl_init();
 
-    // Initialize NVS.
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
+//     display_qr();
 
-    msg_init(); 
-}
+//     // Initialize NVS.
+//     esp_err_t err = nvs_flash_init();
+//     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+//         ESP_ERROR_CHECK(nvs_flash_erase());
+//         err = nvs_flash_init();
+//     }
+//     ESP_ERROR_CHECK( err );
+
+//     msg_init(); 
+// }
 
 
