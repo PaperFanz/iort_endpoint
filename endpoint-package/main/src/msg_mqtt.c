@@ -50,10 +50,10 @@
 
 
 #define WIFI_SSID "#YangGang2.4"
-#define WIFI_PASSWORD ""
+#define WIFI_PASSWORD "automation"
 #define AWS_CLIENT_ID "myesp32"
 
-static const char *TAG = "subpub";
+static const char *TAG = "MQTT";
 
 /* The examples use simple WiFi configuration that you can set via
    'make menuconfig'.
@@ -169,8 +169,6 @@ void mqtt_init(){
     mqttInitParams.pDeviceCertLocation = (const char *)certificate_pem_crt_start;
     mqttInitParams.pDevicePrivateKeyLocation = (const char *)private_pem_key_start;
 
-    ESP_LOGI(TAG, "Certificates %s\n%s\n%s\n", mqttInitParams.pRootCALocation, mqttInitParams.pRootCALocation, mqttInitParams.pDevicePrivateKeyLocation);
-    
     mqttInitParams.mqttCommandTimeout_ms = 20000;
     mqttInitParams.tlsHandshakeTimeout_ms = 5000;
     mqttInitParams.isSSLHostnameVerify = true;
@@ -239,9 +237,12 @@ bool mqtt_publish(const char* topic, char* msg){
 
     const int topic_len = strlen(topic);
 
+    
+    /*
     do {
         rc = aws_iot_mqtt_yield(&client, 100);
     } while(rc == NETWORK_ATTEMPTING_RECONNECT);
+    */
 
     rc = aws_iot_mqtt_publish(&client, topic, topic_len, &paramsQOS0);
 

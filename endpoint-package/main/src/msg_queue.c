@@ -10,7 +10,6 @@
 #include <string.h>
 #include "../inc/msg_queue.h"
 
-#define QUEUE_LEN 10
 #define QUEUE_ITEM_SIZE sizeof(iot_msg_t)
 #define QUEUE_BUF_BYTES (QUEUE_LEN * QUEUE_ITEM_SIZE)
 

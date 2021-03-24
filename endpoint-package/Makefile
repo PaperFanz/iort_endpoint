@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := subscribe_publish
+PROJECT_NAME := endpoint-package
 
 include $(IDF_PATH)/make/project.mk
 

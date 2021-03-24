@@ -25,6 +25,8 @@ typedef enum ros_msg_type {
 #define IOT_MSG_KEY_SIZE 64
 #define IOT_MSG_DATA_SIZE 128
 
+#define QUEUE_LEN 10
+
 typedef union iot_data {
     int64_t i64;
     double f64;
