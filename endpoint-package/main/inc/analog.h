@@ -53,7 +53,7 @@ typedef struct analog_ch {
     /*
         sample and process raw ADC values, default implementation in analog.c
         args: channel_id_t id - this channel's id
-        ret: uint32_t sample
+        ret: uint32_t - processed ADC sample
     */
     uint32_t (* sampling_func)(channel_id_t, soft_avg_t);
 
@@ -62,9 +62,9 @@ typedef struct analog_ch {
         args: iot_msg_t * msg - pointer to the message in this channel, default
                                 implementation in analog.c
               uint32_t sample - last sample stored in the channel
-        ret: none
+        ret: bool - y/n write message to queue
     */
-    void (* formatting_func)(iot_msg_t *, uint32_t);
+    bool (* formatting_func)(iot_msg_t *, uint32_t);
 } analog_ch_t;
 
 void analog_init(xQueueHandle iotMsgQueue);
@@ -75,6 +75,6 @@ analog_err_t shutdown_channel(channel_id_t ch);
 
 analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t, soft_avg_t));
 
-analog_err_t set_formatting_func(channel_id_t ch, void (* f)(iot_msg_t *, uint32_t));
+analog_err_t set_formatting_func(channel_id_t ch, bool (* f)(iot_msg_t *, uint32_t));
 
 #endif

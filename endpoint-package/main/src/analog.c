@@ -26,7 +26,7 @@ uint32_t default_sampling_func(channel_id_t id, soft_avg_t avg)
     return read_adc1_raw(id_to_channel_remap[id], avg);
 }
 
-void default_formatting_func(iot_msg_t * msg, uint32_t sample)
+bool default_formatting_func(iot_msg_t * msg, uint32_t sample)
 {
     switch (msg->type) {
     case BOOL:
@@ -42,6 +42,7 @@ void default_formatting_func(iot_msg_t * msg, uint32_t sample)
         snprintf(msg->data.s, IOT_MSG_DATA_SIZE, "%d units", sample);
         break;
     }
+    return true;
 }
 
 void analog_task(void * param)
@@ -59,9 +60,9 @@ void analog_task(void * param)
         vTaskDelayUntil(&lastLoopTime, ch->rate);
 
         ch->sample = ch->sampling_func(ch->id, ch->avg);
-        ch->formatting_func(&ch->msg, ch->sample);
-
-        xQueueSend(iotMsgQueue, (void *) &ch->msg, (TickType_t) 10);
+        if (ch->formatting_func(&ch->msg, ch->sample)) {
+            xQueueSend(iotMsgQueue, (void *) &ch->msg, (TickType_t) 10);
+        }
     }
 }
 
@@ -121,7 +122,7 @@ analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t, sof
     return ANALOG_OK;
 }
 
-analog_err_t set_formatting_func(channel_id_t ch, void (* f)(iot_msg_t *, uint32_t))
+analog_err_t set_formatting_func(channel_id_t ch, bool (* f)(iot_msg_t *, uint32_t))
 {
     if (ch >= ANALOG_CHANNEL_NUM) return INVALID_CHANNEL;
     channels[ch].formatting_func = f;

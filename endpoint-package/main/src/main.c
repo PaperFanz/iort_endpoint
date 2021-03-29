@@ -51,16 +51,16 @@ text_config_t txt_cfg = {
     .color = EPD_BLACK,
 };
 
-#define FMT_OVERALL1 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s]}"
-#define FMT_OVERALL2 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s]}"
-#define FMT_OVERALL3 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s]}"
-#define FMT_OVERALL4 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s]}"
-#define FMT_OVERALL5 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s]}"
-#define FMT_OVERALL6 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s%s]}"
-#define FMT_OVERALL7 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s%s%s]}"
-#define FMT_OVERALL8 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s%s%s%s]}"
-#define FMT_OVERALL9 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s%s%s%s%s]}"
-#define FMT_OVERALL10 "{\"uuid\": %d, \"time\": %ld, \"data\": [%s%s%s%s%s%s%s%s%s%s]}"
+#define FMT_OVERALL1 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s]}"
+#define FMT_OVERALL2 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s]}"
+#define FMT_OVERALL3 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s]}"
+#define FMT_OVERALL4 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s]}"
+#define FMT_OVERALL5 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s]}"
+#define FMT_OVERALL6 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s%s]}"
+#define FMT_OVERALL7 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s%s%s]}"
+#define FMT_OVERALL8 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s%s%s%s]}"
+#define FMT_OVERALL9 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s%s%s%s%s]}"
+#define FMT_OVERALL10 "{\"uuid\": %d, \"time\": %lld, \"data\": [%s%s%s%s%s%s%s%s%s%s]}"
 #define FMT_OVERALL_SZ 32
 #define FMT_MSG_COMMA "{\"%s\" : %s},"
 #define FMT_MSG_COMMA_SZ 8
@@ -129,41 +129,42 @@ void msg_jsonify_send(xQueueHandle queue){
         array_sz += strlen(json_array[i]);
     }
 
-    time_t now = 0;
-    time(&now);
+    struct timeval tv_now;
+    gettimeofday(&tv_now, NULL);
+    int64_t time_us = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
 
     char json_string[array_sz + FMT_OVERALL_SZ + 5];
 
     switch(json_array_idx){
         case 1:
-            sprintf(json_string, FMT_OVERALL1, UUID, now, json_array[0]);
+            sprintf(json_string, FMT_OVERALL1, UUID, time_us, json_array[0]);
             break;
         case 2:
-            sprintf(json_string, FMT_OVERALL2, UUID, now, json_array[0], json_array[1]);
+            sprintf(json_string, FMT_OVERALL2, UUID, time_us, json_array[0], json_array[1]);
             break;
         case 3:
-            sprintf(json_string, FMT_OVERALL3, UUID, now, json_array[0], json_array[1], json_array[2]);
+            sprintf(json_string, FMT_OVERALL3, UUID, time_us, json_array[0], json_array[1], json_array[2]);
             break;
         case 4:
-            sprintf(json_string, FMT_OVERALL4, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3]);
+            sprintf(json_string, FMT_OVERALL4, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3]);
             break;
         case 5:
-            sprintf(json_string, FMT_OVERALL5, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4]);
+            sprintf(json_string, FMT_OVERALL5, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4]);
             break;
         case 6:
-            sprintf(json_string, FMT_OVERALL6, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5]);
+            sprintf(json_string, FMT_OVERALL6, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5]);
             break;
         case 7:
-            sprintf(json_string, FMT_OVERALL7, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6]);
+            sprintf(json_string, FMT_OVERALL7, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6]);
             break;
         case 8:
-            sprintf(json_string, FMT_OVERALL8, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7]);
+            sprintf(json_string, FMT_OVERALL8, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7]);
             break;
         case 9:
-            sprintf(json_string, FMT_OVERALL9, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7], json_array[8]);
+            sprintf(json_string, FMT_OVERALL9, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7], json_array[8]);
             break;
         case 10:
-            sprintf(json_string, FMT_OVERALL10, UUID, now, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7], json_array[8], json_array[9]);
+            sprintf(json_string, FMT_OVERALL10, UUID, time_us, json_array[0], json_array[1], json_array[2], json_array[3], json_array[4], json_array[5], json_array[6], json_array[7], json_array[8], json_array[9]);
             break;
     }
 
