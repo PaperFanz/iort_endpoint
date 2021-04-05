@@ -40,7 +40,12 @@
 #include "epdgl.h"
 #include "qrcode.h"
 
-#define TOPIC "data"
+/*
+    GLOBALS
+*/
+static const char * DEV_UUID = DEVICE_UUID;
+
+static const char * TOPIC = "device/"DEVICE_UUID"/data";
 
 static const int UUID = 0;
 
@@ -201,21 +206,6 @@ void time_init(void)
         time(&now);
         localtime_r(&now, &timeinfo);
     }
-
-    //central time
-    /*setenv("TZ", "CST6CDT,M3.2.0/2,M11.1.0", 1);
-    tzset();
-
-    time(&now);
-    localtime_r(&now, &timeinfo);
-
-    char strftime_buf[64];
-    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    ESP_LOGI(TAG, "The current date/time in Austin is: %s %ld", strftime_buf, now);
-    */
-
-    ESP_LOGI(TAG, "Current time is %ld", now);
-
 }
 
 void display_qr(void)
@@ -244,16 +234,14 @@ void consumer(void * param)
 {
     xQueueHandle queue = (xQueueHandle) param;
 
-    const char* topic = TOPIC;
-    mqtt_subscribe(topic);
-    //mqtt_publish(topic, "Hello!");
+    // mqtt_subscribe(topic);
+    // mqtt_publish(topic, "Hello!");
 
 
     iot_msg_t msg;
 
     for (;;) {
         if (xQueuePeek(queue, (void *) &msg, (TickType_t) (5 / portTICK_PERIOD_MS))) {
-            ESP_LOGI("consumer", "got %lld from %s\n", msg.data.i64, msg.key);
             msg_jsonify_send(queue);
         }
         vTaskDelay(5 / portTICK_PERIOD_MS);
