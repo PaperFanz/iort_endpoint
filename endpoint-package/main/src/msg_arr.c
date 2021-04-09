@@ -4,34 +4,16 @@
     and message sending task
 
 */
-
-#include <freertos/FreeRTOS.h>
-#include <freertos/queue.h>
 #include <string.h>
-#include "../inc/msg_queue.h"
 
-#define QUEUE_ITEM_SIZE sizeof(iot_msg_t)
-#define QUEUE_BUF_BYTES (QUEUE_LEN * QUEUE_ITEM_SIZE)
+#include "msg_arr.h"
+#include "analog.h"
 
-uint8_t queue_buf[QUEUE_BUF_BYTES];
+iot_msg_t DATA_BUF[ANALOG_CHANNEL_NUM];
 
-static StaticQueue_t msg_queue_data;
-
-xQueueHandle init_msg_queue(void)
+iot_msg_arr_t init_msg_arr(void)
 {
-    xQueueHandle xqueue = xQueueCreateStatic(
-        QUEUE_LEN,
-        QUEUE_ITEM_SIZE,
-        queue_buf,
-        &msg_queue_data
-    );
-
-    /* 
-        create static shouldn't fail unless QUEUE_BUF_BYTES is too large, 
-        so no error checking code is necessary
-    */
-
-    return xqueue;
+    return DATA_BUF;
 }
 
 void set_bool_msg(iot_msg_t * msg, bool bool_)

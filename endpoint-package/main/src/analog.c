@@ -19,7 +19,9 @@ static const adc_channel_t id_to_channel_remap[ANALOG_CHANNEL_NUM] = {
     ADC_CHANNEL_5,
 };
 
-static volatile xQueueHandle iotMsgQueue;
+static volatile iot_msg_arr_t MSG_ARR;
+
+static volatile xTaskHandle MSG_TASK_HANDLE;
 
 uint32_t default_sampling_func(channel_id_t id, soft_avg_t avg)
 {
@@ -30,7 +32,7 @@ bool default_formatting_func(iot_msg_t * msg, uint32_t sample)
 {
     switch (msg->type) {
     case BOOL:
-        msg->data.b = sample & 0x01;
+        msg->data.b = sample > 2048;
         break;
     case INT64:
         msg->data.i64 = sample;
@@ -61,14 +63,17 @@ void analog_task(void * param)
 
         ch->sample = ch->sampling_func(ch->id, ch->avg);
         if (ch->formatting_func(&ch->msg, ch->sample)) {
-            xQueueSend(iotMsgQueue, (void *) &ch->msg, (TickType_t) 10);
+            /*
+                update data for message task and notify
+            */
         }
     }
 }
 
-void analog_init(xQueueHandle msgQueue)
+void analog_init(iot_msg_arr_t msgs, xTaskHandle msg_task_handle)
 {
-    iotMsgQueue = msgQueue;
+    MSG_ARR = msgs;
+    MSG_TASK_HANDLE = msg_task_handle;
 
     adc_init();
     for (int i = 0; i < ANALOG_CHANNEL_NUM; ++i) {

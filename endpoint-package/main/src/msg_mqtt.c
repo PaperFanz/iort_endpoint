@@ -48,10 +48,7 @@
 #include "aws_iot_version.h"
 #include "aws_iot_mqtt_client_interface.h"
 
-
-#define WIFI_SSID "godbox"
-#define WIFI_PASSWORD "we<3venkata"
-#define AWS_CLIENT_ID "myesp32"
+#include "config.h"
 
 static const char *TAG = "MQTT";
 
@@ -94,12 +91,12 @@ extern const uint8_t private_pem_key_end[] asm("_binary_private_pem_key_end");
 /**
  * @brief Default MQTT HOST URL is pulled from the aws_iot_config.h
  */
-char HostAddress[255] = "a3p4yg5a5hm2rp-ats.iot.us-east-2.amazonaws.com";
+static const char HostAddress[255] = MQTT_HOST_ADDR;
 
 /**
  * @brief Default MQTT port is pulled from the aws_iot_config.h
  */
-uint32_t port = 8883;//AWS_IOT_MQTT_PORT;
+static const uint32_t port = MQTT_HOST_PORT;//AWS_IOT_MQTT_PORT;
 
 
 AWS_IoT_Client client;
