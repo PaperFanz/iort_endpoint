@@ -6,15 +6,8 @@
 */
 #include <string.h>
 
-#include "msg_arr.h"
+#include "msg.h"
 #include "analog.h"
-
-iot_msg_t DATA_BUF[ANALOG_CHANNEL_NUM];
-
-iot_msg_arr_t init_msg_arr(void)
-{
-    return DATA_BUF;
-}
 
 void set_bool_msg(iot_msg_t * msg, bool bool_)
 {

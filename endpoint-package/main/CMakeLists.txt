@@ -1,7 +1,7 @@
 
 set(SRCS
     src/msg_mqtt.c
-    src/msg_arr.c
+    src/msg.c
     src/msg_task.c
     src/analog.c
     src/main.c
@@ -10,7 +10,7 @@ set(SRCS
 set(INCS
     inc/config.h
     inc/msg_mqtt.h
-    inc/msg_arr.h
+    inc/msg.h
     inc/msg_task.h
     inc/analog.h
 )

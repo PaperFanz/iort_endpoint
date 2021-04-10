@@ -28,8 +28,9 @@
 
 #include "msg_task.h"
 #include "msg_mqtt.h"
-#include "msg_arr.h"
+#include "msg.h"
 #include "config.h"
+#include "analog.h"
 
 /*
     GLOBALS
@@ -37,38 +38,97 @@
 static const char TAG[] = "MSG_JSONIFY";
 static const char DEV_UUID[] = DEVICE_UUID;
 static const char TOPIC[] = "device/"DEVICE_UUID"/data";
-static const char MSG_FORMAT[] = 
+static const char MSG_FORMAT_PRE[] = 
 "{"
     "\"uuid\":\""DEVICE_UUID"\","
     "\"time\":%lld,"
-    "\"data\":["
-        "%s"
+    "\"data\":[";
+
+static const char BOOL_DATA_FORMAT[] = 
+"{\"%s\":%s}";
+
+static const char INT64_DATA_FORMAT[] = 
+"{\"%s\":%lld}";
+
+static const char FLOAT64_DATA_FORMAT[] = 
+"{\"%s\":%g}";
+
+static const char STRING_DATA_FORMAT[] = 
+"{\"%s\":\"%s\"}";
+
+static const char MSG_FORMAT_POST[] =
     "]"
 "}";
 
-static char MSG[sizeof(MSG_FORMAT) + ((IOT_MSG_DATA_SIZE + 8) * 4) * sizeof(char)];
+#define UINT64_MAX_CHARS 20
+#define TIME_UUID_MAX_SIZE (sizeof(MSG_FORMAT_PRE) + UINT64_MAX_CHARS + 1)
+#define KEY_VALUE_MAX_SIZE (IOT_MSG_KEY_SIZE + IOT_MSG_DATA_SIZE + 8)
+#define CLOSE_PAR_MAX_SIZE (sizeof(MSG_FORMAT_POST) + 1)
+
+static char MSG[
+    TIME_UUID_MAX_SIZE +
+    (KEY_VALUE_MAX_SIZE * 4) + 
+    CLOSE_PAR_MAX_SIZE
+];
+
+static char DATA[ANALOG_CHANNEL_NUM][KEY_VALUE_MAX_SIZE];
 
 void msg_task(void * param)
 {
-    iot_msg_arr_t msgs = (iot_msg_arr_t) param;
-    iot_msg_t msg;
-
     uint32_t notif = 0;
+    uint32_t initd = 0;
+    uint32_t i;
+    struct timeval tv_now;
+    int64_t time_us;
     while (true) {
         /* wait indefinitely and clear all pending messages */
         xTaskNotifyWait(0x0, 0xffffffff, &notif, portMAX_DELAY);
 
+        /* update cached data on change */
+        for (i = 0; i < ANALOG_CHANNEL_NUM; ++i) {
+            if (notif & (1UL << i)) {
+                /* data on channel i has changed */
+                iot_msg_t * msg = get_channel_msg(i);
+                switch (msg->type) {
+                case BOOL:
+                    snprintf(DATA[i], KEY_VALUE_MAX_SIZE, BOOL_DATA_FORMAT,
+                             msg->key, (msg->data.b ? "true" : "false"));
+                    break;
+                case INT64:
+                    snprintf(DATA[i], KEY_VALUE_MAX_SIZE, INT64_DATA_FORMAT,
+                             msg->key, msg->data.i64);
+                    break;
+                case FLOAT64:
+                    snprintf(DATA[i], KEY_VALUE_MAX_SIZE, FLOAT64_DATA_FORMAT,
+                             msg->key, msg->data.f64);
+                    break;
+                case STRING:
+                    snprintf(DATA[i], KEY_VALUE_MAX_SIZE, STRING_DATA_FORMAT,
+                             msg->key, msg->data.s);
+                    break;
+                }
+                initd |= (1UL << i);
+            }
+        }
+
+        gettimeofday(&tv_now, NULL);
+        time_us = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
+        snprintf(MSG, TIME_UUID_MAX_SIZE, MSG_FORMAT_PRE, time_us);
+        /* concatenate all key-value pairs and send */
+        for (i = 0; i < ANALOG_CHANNEL_NUM; ++i) {
+            if (initd & (1UL << i)) {
+                strcat(MSG, DATA[i]);
+                if (i < ANALOG_CHANNEL_NUM - 1) {
+                    strcat(MSG, ",");
+                }
+            }
+        }
+        strcat(MSG, MSG_FORMAT_POST);
+
+        mqtt_publish(TOPIC, MSG);
+
+        // ESP_LOGI(TAG, "MSG: %s\n", MSG);
     }
-}
-
-const char * msg_jsonify(iot_msg_arr_t queue)
-{
-    /* get current time */
-    struct timeval tv_now;
-    gettimeofday(&tv_now, NULL);
-    int64_t time_us = (int64_t)tv_now.tv_sec * 1000000L + (int64_t)tv_now.tv_usec;
-
-    return MSG;
 }
 
 //taken from esp_sntp example
@@ -92,7 +152,7 @@ void time_init(void)
     }
 }
 
-xTaskHandle msg_task_init(iot_msg_arr_t msgs)
+xTaskHandle msg_task_init()
 {
     wifi_init();
     mqtt_init();
@@ -104,7 +164,7 @@ xTaskHandle msg_task_init(iot_msg_arr_t msgs)
         &msg_task,
         "msg_task",
         configMINIMAL_STACK_SIZE * 4,
-        (void *) msgs,
+        NULL,
         4,
         &msg_task_handle
     );

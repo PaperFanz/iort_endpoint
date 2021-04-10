@@ -11,8 +11,8 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
-#include "msg_arr.h"
+
+#include "msg.h"
 
 #define MAX_KEY_LEN 256
 
@@ -67,7 +67,7 @@ typedef struct analog_ch {
     bool (* formatting_func)(iot_msg_t *, uint32_t);
 } analog_ch_t;
 
-void analog_init(iot_msg_arr_t msgs, xTaskHandle msg_task_handle);
+void analog_init(xTaskHandle msg_task_handle);
 
 analog_err_t init_channel(channel_id_t ch, char * key, ros_msg_t type, TickType_t rate);
 
@@ -76,5 +76,7 @@ analog_err_t shutdown_channel(channel_id_t ch);
 analog_err_t set_sampling_func(channel_id_t ch, uint32_t (* f)(channel_id_t, soft_avg_t));
 
 analog_err_t set_formatting_func(channel_id_t ch, bool (* f)(iot_msg_t *, uint32_t));
+
+iot_msg_t * get_channel_msg(channel_id_t ch);
 
 #endif

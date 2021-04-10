@@ -36,10 +36,6 @@ typedef struct iot_msg {
     iot_data_t data;
 } iot_msg_t;
 
-typedef iot_msg_t * iot_msg_arr_t;
-
-iot_msg_arr_t init_msg_arr(void);
-
 void set_bool_msg(iot_msg_t * msg, bool bool_);
 
 void set_int_msg(iot_msg_t * msg, int64_t int_);

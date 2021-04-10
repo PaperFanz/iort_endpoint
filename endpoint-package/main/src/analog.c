@@ -19,8 +19,6 @@ static const adc_channel_t id_to_channel_remap[ANALOG_CHANNEL_NUM] = {
     ADC_CHANNEL_5,
 };
 
-static volatile iot_msg_arr_t MSG_ARR;
-
 static volatile xTaskHandle MSG_TASK_HANDLE;
 
 uint32_t default_sampling_func(channel_id_t id, soft_avg_t avg)
@@ -66,13 +64,13 @@ void analog_task(void * param)
             /*
                 update data for message task and notify
             */
+            xTaskNotify(MSG_TASK_HANDLE, (1UL << ch->id), eSetBits);
         }
     }
 }
 
-void analog_init(iot_msg_arr_t msgs, xTaskHandle msg_task_handle)
+void analog_init(xTaskHandle msg_task_handle)
 {
-    MSG_ARR = msgs;
     MSG_TASK_HANDLE = msg_task_handle;
 
     adc_init();
@@ -132,4 +130,10 @@ analog_err_t set_formatting_func(channel_id_t ch, bool (* f)(iot_msg_t *, uint32
     if (ch >= ANALOG_CHANNEL_NUM) return INVALID_CHANNEL;
     channels[ch].formatting_func = f;
     return ANALOG_OK;
+}
+
+iot_msg_t * get_channel_msg(channel_id_t ch)
+{
+    if (ch >= ANALOG_CHANNEL_NUM) return NULL;
+    return &channels[ch].msg;
 }
