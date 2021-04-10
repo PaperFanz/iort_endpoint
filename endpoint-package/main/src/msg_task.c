@@ -42,22 +42,22 @@ static const char MSG_FORMAT_PRE[] =
 "{"
     "\"uuid\":\""DEVICE_UUID"\","
     "\"time\":%lld,"
-    "\"data\":[";
+    "\"data\":{";
 
 static const char BOOL_DATA_FORMAT[] = 
-"{\"%s\":%s}";
+"\"%s\":%s";
 
 static const char INT64_DATA_FORMAT[] = 
-"{\"%s\":%lld}";
+"\"%s\":%lld";
 
 static const char FLOAT64_DATA_FORMAT[] = 
-"{\"%s\":%g}";
+"\"%s\":%g";
 
 static const char STRING_DATA_FORMAT[] = 
-"{\"%s\":\"%s\"}";
+"\"%s\":\"%s\"";
 
 static const char MSG_FORMAT_POST[] =
-    "]"
+    "}"
 "}";
 
 #define UINT64_MAX_CHARS 20
