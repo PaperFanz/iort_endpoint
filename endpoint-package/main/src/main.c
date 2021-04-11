@@ -74,6 +74,59 @@ void display_qr(void)
     while (!epdgl_update_screen(EPD_SLOW)) vTaskDelay(10);
 }
 
+/*
+    example formatting functions
+*/
+bool uwu_format(iot_msg_t * msg, uint32_t sample)
+{
+    msg->type = STRING;
+    snprintf(msg->data.s, IOT_MSG_DATA_SIZE, 
+             "%s", (sample > 100) ? "OwO" : "UwU");
+    return true;
+}
+
+bool hall_format(iot_msg_t * msg, uint32_t sample)
+{
+    static bool prev = false;
+    bool cur = (sample > 1024);
+    if (prev == cur) {
+        return false;
+    } else {
+        snprintf(msg->data.s, IOT_MSG_DATA_SIZE, 
+                 "%s", cur ? "open" : "closed");
+        prev = cur;
+        return true;
+    }
+}
+
+bool light_format(iot_msg_t * msg, uint32_t sample)
+{
+    static bool prev = false;
+    bool cur = (sample > 2048);
+    if (prev == cur) {
+        return false;
+    } else {
+        snprintf(msg->data.s, IOT_MSG_DATA_SIZE, 
+                 "%s", cur ? "dark" : "light");
+        prev = cur;
+        return true;
+    }
+}
+
+bool tilt_format(iot_msg_t * msg, uint32_t sample)
+{
+    static bool prev = true;
+    bool cur = (sample > 1024);
+    if (prev == cur) {
+        return false;
+    } else {
+        snprintf(msg->data.s, IOT_MSG_DATA_SIZE, 
+                 "%s", cur ? "true" : "false");
+        prev = cur;
+        return true;
+    }
+}
+
 void app_main(void)
 {
 
@@ -111,8 +164,16 @@ void app_main(void)
     /*
         channel init depends on analog init
     */ 
-    init_channel(CH0, "channel 0", INT64, taskHz(10));
-    init_channel(CH1, "channel 1", INT64, taskHz(4));
+    init_channel(CH0, "light", STRING, taskHz(10));
+    set_formatting_func(CH0, &light_format);
+
+    init_channel(CH1, "hall", STRING, taskHz(10));
+    set_formatting_func(CH1, &hall_format);
+
+    init_channel(CH2, "pot", INT64, taskHz(10));
+
+    init_channel(CH3, "tilt", STRING, taskHz(10));
+    set_formatting_func(CH3, &tilt_format);
 
     epdgl_draw_string("channel init done\n", &txt_cfg);
     while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);

@@ -27,7 +27,7 @@ typedef enum channel {
     CH0,
     CH1,
     CH2,
-    CH4,
+    CH3,
     ANALOG_CHANNEL_NUM,
 } channel_id_t;
 
