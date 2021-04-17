@@ -413,6 +413,12 @@ epdgl_set_cursor(int32_t x, int32_t y)
 }
 
 void
+epdgl_left_align_cursor(void)
+{
+    CURSOR_X = 0;
+}
+
+void
 epdgl_draw_char(char s, text_config_t * cfg)
 {
     font_t * f = cfg->font;

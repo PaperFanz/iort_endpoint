@@ -48,10 +48,14 @@
 #include "aws_iot_version.h"
 #include "aws_iot_mqtt_client_interface.h"
 
+#include "config.h"
 
-#define WIFI_SSID "godbox"
-#define WIFI_PASSWORD "we<3venkata"
-#define AWS_CLIENT_ID "myesp32"
+#include "epdgl.h"
+
+text_config_t mqtt_txt_cfg = {
+    .font = &Consolas20,
+    .color = EPD_BLACK,
+};
 
 static const char *TAG = "MQTT";
 
@@ -94,12 +98,12 @@ extern const uint8_t private_pem_key_end[] asm("_binary_private_pem_key_end");
 /**
  * @brief Default MQTT HOST URL is pulled from the aws_iot_config.h
  */
-char HostAddress[255] = "a3p4yg5a5hm2rp-ats.iot.us-east-2.amazonaws.com";
+static char HostAddress[255] = MQTT_HOST_ADDR;
 
 /**
  * @brief Default MQTT port is pulled from the aws_iot_config.h
  */
-uint32_t port = 8883;//AWS_IOT_MQTT_PORT;
+static const uint32_t port = MQTT_HOST_PORT;//AWS_IOT_MQTT_PORT;
 
 
 AWS_IoT_Client client;
@@ -194,13 +198,20 @@ void mqtt_init(){
     connectParams.isWillMsgPresent = false;
 
     ESP_LOGI(TAG, "Connecting to AWS...");
+    epdgl_left_align_cursor();
+    epdgl_draw_string("connecting to AWS", &mqtt_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
     do {
+        epdgl_draw_string(".", &mqtt_txt_cfg);
+        while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
         rc = aws_iot_mqtt_connect(&client, &connectParams);
         if(SUCCESS != rc) {
             ESP_LOGE(TAG, "Error(%d) connecting to %s:%d", rc, mqttInitParams.pHostURL, mqttInitParams.port);
             vTaskDelay(1000 / portTICK_RATE_MS);
         }
     } while(SUCCESS != rc);
+    epdgl_draw_string("connected\n", &mqtt_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 
     /*
      * Enable Auto Reconnect functionality. Minimum and Maximum time of Exponential backoff are set in aws_iot_config.h
@@ -219,7 +230,7 @@ bool mqtt_subscribe(const char* topic){
     const int topic_len = strlen(topic);
 
     //ESP_LOGI(TAG, "Subscribing...");
-    IoT_Error_t rc = aws_iot_mqtt_subscribe(&client, topic, topic_len, QOS0, iot_subscribe_callback_handler, NULL);
+    IoT_Error_t rc = aws_iot_mqtt_subscribe(&client, topic, topic_len, QOS0, &iot_subscribe_callback_handler, NULL);
   
     return (rc == SUCCESS);
 
