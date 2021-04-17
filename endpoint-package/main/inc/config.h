@@ -17,8 +17,8 @@
 /*
     AWS config
 */
-#define MQTT_HOST_ADDR "a3p4yg5a5hm2rp-ats.iot.us-east-2.amazonaws.com"
-// #define MQTT_HOST_ADDR "adlphu38p2o1d-ats.iot.us-east-2.amazonaws.com"
+// #define MQTT_HOST_ADDR "a3p4yg5a5hm2rp-ats.iot.us-east-2.amazonaws.com"
+#define MQTT_HOST_ADDR "adlphu38p2o1d-ats.iot.us-west-2.amazonaws.com"
 #define MQTT_HOST_PORT 8883
 
 /*

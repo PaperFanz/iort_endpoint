@@ -41,7 +41,6 @@ static const char DEV_UUID[] = DEVICE_UUID;
 static const char TOPIC[] = "device/"DEVICE_UUID"/data";
 static const char MSG_FORMAT_PRE[] = 
 "{"
-    "\"uuid\":\""DEVICE_UUID"\","
     "\"time\":%lld,"
     "\"data\":{";
 
