@@ -679,12 +679,8 @@ void epd_init(void)
     esp32_init();
     #endif
 
-    printf("here1\n");
-
     select();
     reset();
-    
-    printf("here2\n");
 
     // begin startup sequence
     writecmd(POWER_SETTING);
@@ -720,9 +716,7 @@ void epd_init(void)
 
     writecmd(POWER_ON);
 
-    printf("here3\n");
     wait_until_idle();  // comment out if debugging with logic analyzer
-    printf("here4\n");
 
     epd_set_lut_slow();
     epd_clear_frame();

@@ -75,6 +75,8 @@ void epdgl_fill_circle(int32_t x, int32_t y, int32_t r, epd_color_t c);
 
 void epdgl_set_cursor(int32_t x, int32_t y);
 
+void epdgl_left_align_cursor(void);
+
 // Moves cursor
 void epdgl_draw_char(char s, text_config_t * cfg);
 

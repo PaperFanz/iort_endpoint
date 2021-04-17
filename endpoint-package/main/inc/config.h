@@ -18,6 +18,7 @@
     AWS config
 */
 #define MQTT_HOST_ADDR "a3p4yg5a5hm2rp-ats.iot.us-east-2.amazonaws.com"
+// #define MQTT_HOST_ADDR "adlphu38p2o1d-ats.iot.us-east-2.amazonaws.com"
 #define MQTT_HOST_PORT 8883
 
 /*
@@ -25,6 +26,6 @@
 */
 #define WIFI_SSID "godbox"
 #define WIFI_PASSWORD "we<3venkata"
-#define AWS_CLIENT_ID "myesp32"
+#define AWS_CLIENT_ID "iort-endpoint"
 
 #endif

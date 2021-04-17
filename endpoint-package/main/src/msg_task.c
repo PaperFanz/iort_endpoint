@@ -31,6 +31,7 @@
 #include "msg.h"
 #include "config.h"
 #include "analog.h"
+#include "epdgl.h"
 
 /*
     GLOBALS
@@ -72,6 +73,11 @@ static char MSG[
 ];
 
 static char DATA[ANALOG_CHANNEL_NUM][KEY_VALUE_MAX_SIZE];
+
+text_config_t msg_txt_cfg = {
+    .font = &Consolas20,
+    .color = EPD_BLACK,
+};
 
 void msg_task(void * param)
 {
@@ -135,6 +141,9 @@ void msg_task(void * param)
 void time_init(void)
 {
     ESP_LOGI(TAG, "Initializing SNTP");
+    epdgl_left_align_cursor();
+    epdgl_draw_string("Initializing SNTP", &msg_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setservername(0, "pool.ntp.org");
     sntp_init();
@@ -149,12 +158,21 @@ void time_init(void)
         vTaskDelay(2000 / portTICK_PERIOD_MS);
         time(&now);
         localtime_r(&now, &timeinfo);
+        epdgl_draw_string(".", &msg_txt_cfg);
+        while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
     }
+    epdgl_draw_string("RTC Synchronized\n", &msg_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 }
 
 xTaskHandle msg_task_init()
 {
+    epdgl_left_align_cursor();
+    epdgl_draw_string("connecting to "WIFI_SSID"...", &msg_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
     wifi_init();
+    epdgl_draw_string("connected\n", &msg_txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
     mqtt_init();
     time_init();
 

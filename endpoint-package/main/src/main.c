@@ -120,9 +120,7 @@ bool tilt_format(iot_msg_t * msg, uint32_t sample)
     if (prev == cur) {
         return false;
     } else {
-        snprintf(msg->data.s, IOT_MSG_DATA_SIZE, 
-                 "%s", cur ? "true" : "false");
-        prev = cur;
+        prev = msg->data.b = cur;
         return true;
     }
 }
@@ -135,6 +133,9 @@ void app_main(void)
     epdgl_init();
    
     // Initialize NVS.
+    epdgl_draw_string("nvs init...", &txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
+
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -142,28 +143,41 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(err);
 
-    epdgl_draw_string("nvs init done\n", &txt_cfg);
+    epdgl_draw_string("done\n", &txt_cfg);
     while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 
     /*
         msg task init depends on message array
     */
+    epdgl_left_align_cursor();
+    epdgl_draw_string("msg task init\n", &txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
+
     xTaskHandle msg_task_handle = msg_task_init();
 
+    epdgl_left_align_cursor();
     epdgl_draw_string("msg task init done\n", &txt_cfg);
     while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 
     /*
         analog init depends on message task handle and message array
     */
+    epdgl_left_align_cursor();
+    epdgl_draw_string("analog init...", &txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
+
     analog_init(msg_task_handle);
 
-    epdgl_draw_string("analog init done\n", &txt_cfg);
+    epdgl_draw_string("done\n", &txt_cfg);
     while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 
     /*
         channel init depends on analog init
     */ 
+    epdgl_left_align_cursor();
+    epdgl_draw_string("channel init...", &txt_cfg);
+    while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
+
     init_channel(CH0, "light", STRING, taskHz(10));
     set_formatting_func(CH0, &light_format);
 
@@ -172,10 +186,10 @@ void app_main(void)
 
     init_channel(CH2, "pot", INT64, taskHz(10));
 
-    init_channel(CH3, "tilt", STRING, taskHz(10));
+    init_channel(CH3, "tilt", BOOL, taskHz(10));
     set_formatting_func(CH3, &tilt_format);
 
-    epdgl_draw_string("channel init done\n", &txt_cfg);
+    epdgl_draw_string("done\n", &txt_cfg);
     while (!epdgl_update_screen(EPD_FAST)) vTaskDelay(10);
 
     display_qr();
