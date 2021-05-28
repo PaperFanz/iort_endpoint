@@ -1,72 +1,145 @@
-This project uses the amazon embedded sdk (https://github.com/aws/aws-iot-device-sdk-embedded-C) to implement mqtt communication to IoT Core. At the moment, the program puts dummy data into a FreeRTOS queue and sends it to IoT Core. The stack allocation is wack though, and the program will fail pretty often. TODO.
 
+# Endpoint Firmware
 
-Setting up the project:
+This repository contains the firmware for the IoT-Robotics Integration project. It is built around the [Amazon Web Services IoT Device SDK for Embedded C](https://github.com/aws/aws-iot-device-sdk-embedded-C) and [esp-idf](). The main files for the project can be found under `endpoint-package/main`.
 
--Add files to iot-rtos-pkg/main/CMakeLists.txt
+## Setting up the Project
 
--Change FreeRTOS headers from #include <*.h> -> include "freertos/*.h" 
+There is some manual setup required to connect the endpoint firmware to AWS through your WiFi network. The below instructions are up to date as of May 18th, 2021.
 
--Set WIFI SSID and password in "msg_mqtt.c"
+### Connecting to AWS
 
-How to build and flash:
+The project uses AWS as the primary web component, so you will need to create a root AWS account at [https://portal.aws.amazon.com/billing/signup#/start](https://portal.aws.amazon.com/billing/signup#/start). Follow the instructions [here](https://aws.amazon.com/cli/) to set up the AWS command line interface.
 
--Make sure that the following lines are in your .bashrc:
+Open a terminal on your local machine and run:
 
-    export PATH="$HOME/<repo>/xtensa-esp32-elf/bin:$PATH"
+```sh
+aws iot create-thing --thing-name "myEndpoint"
+```
 
-    export IDF_PATH=~/<repo>/esp-idf
+Open a web browser and log in to the AWS console, then navigate to the [AWS IoT Core page](https://us-west-2.console.aws.amazon.com/iot/home?region=us-west-2#/dashboard). ***Make sure that your CLI and Web Console are connected to the same AWS region.*** You can easily switch the Web Console to the right region from a dropdown menu in the upper right corner of the page. I used `us-west-2` for the full system demo.
 
-    export PATH="$IDF_PATH/tools:$PATH"
+In the sidebar, navigate to `Manage>Things` and verify that the name of the thing (`myEndpoint`) you just created in the CLI is there. **DO NOT** attempt to use the `Create` button on this page to create any endpoints; the web backend is bugged and will not work. Click on `myEndpoint>Security`, then select `Create certificate`. Download and save for later the:
 
-    *Note that you cannot run the last two lines for the other freertos project
+* Certificate for this thing
+* Private Key
+* Root CA for AWS IoT
 
--If idf.py is on your path as well, then you build using:
+then click `Attach a policy`. Click `Create a new policy` and paste in the following, replacing `us-west-2` with your region:
 
-    idf.py -p /dev/<port ESP is connected on> build
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iot:Connect",
+      "Resource": "arn:aws:iot:us-west-2:729534713919:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Publish",
+      "Resource": "arn:aws:iot:us-west-2:729534713919:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Subscribe",
+      "Resource": "arn:aws:iot:us-west-2:729534713919:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Receive",
+      "Resource": "arn:aws:iot:us-west-2:729534713919:*"
+    }
+  ]
+}
+```
 
-    idf.py -p /dev/<port ESP is connected on> flash
+### Configuring the Project
 
-    idf.py -p /dev/<port ESP is connected on> monitor
+Now we need to point the endpoint firmware to the certificate files you just generated and configure the WiFi settings in order to establish the connection with AWS.
 
-    *I personally just aliased idf as "alias idf='python ~/<repo>/esp-idf/tools/idf.py'", and run all the commands with idf instead of idf.py
+#### AWS Certificates
 
-Some Misc Notes:
+Copy the certificate into `endoint-package/main/certs/certificate.pem.crt`.
 
--QueueCreateStatic doesn't work unless some config flag is set, for the moment, I replaced it with it's dynamic brother
+Copy the private key into `endoint-package/main/certs/private.pem.key`.
 
--The JSON function is pretty basic, I will augment it to include more
+Copy the root CA into `endoint-package/main/certs/aws-root-ca.pem`.
 
--The topic is currently set to one thing, but it would be best to figure out how to name different topics
+#### WiFi
 
-Notes on Porting the AWS Embedded SDK into the other project:
+Modify `endpoint-package/main/inc/config.h`:
 
-Honestly, if you're feeling extra motivated, you can try to set this up, but no sweat if not. We can try to figure it out after Spring Break.
+Generate a new Version 4 UUID at [https://www.uuidgenerator.net/](https://www.uuidgenerator.net/) and paste it into the `DEVICE_UUID` definition:
 
-What I've done so far:
+```c
+#define DEVICE_UUID "db24801e-c62c-4fc0-83e8-7866448e4fbf" // your uuid here
+```
 
--Copied the aws_iot folder from <repo>/esp-idf/components/aws_iot into <other_repo>/freertos/vendors/espressif/esp-idf/components
+Navigate to `Manage>Things>myEndpoint>Interact` and copy the Thing Shadow URI into the `MQTT_HOST_ADDR` definition:
 
--The CMakeFiles.txt in the aws_iot folder has an if and else based of a CONFIG_..., removed the if-else so it is always built
+```c
+#define MQTT_HOST_ADDR "adlphu38p2o1d-ats.iot.us-west-2.amazonaws.com" // your Rest API Endpoint here
+```
 
--The Kconfig file in the aws_iot folder has statements that say "depends on" for all configs, removed the "depends on" line so the config is always set
+Then fill in the following for your endoint deployment environment:
 
--I've been testing by just including one of the aws headers in the main, for example you can add the following includes
+```c
+#define WIFI_SSID "ssid"            // your WiFi network name
+#define WIFI_PASSWORD "pass"        // your WiFi passowrd
+#define AWS_CLIENT_ID "myEndpoint"  // your thing name
+```
 
-    #include "aws_iot_config.h"
+#### Editing Analog Channels
 
-    #include "aws_iot_log.h"
+You may also configure the analog channels with different channel names, rates, and functions in `endpoint-package/main/src/main.c`. An example is given below:
 
-    #include "aws_iot_version.h"
+```c
+//           Channel id, channel name, data type, sample rate
+init_channel(CH0, "light", STRING, taskHz(10));
 
-    #include "aws_iot_mqtt_client_interface.h"
+//                Channel id, pointer to sampling function
+set_sampling_func(CH0, &light_sample);
 
--After doing this, the linker fails to find the mbedtls functions, causing the build to fail
+//                  Channel id, pointer to formatting function
+set_formatting_func(CH0, &light_format);
+```
 
--The library mbedtls seems to already exist in the project under <other_repo>/freertos/library/3rdparty, but I think since the esp-idf gets built seperately from FreeRTOS, there is some issue in linking? Not too sure what the issue is 
+See `analog.h` for full details on how these can be used to alter the behavior of the endpoint.
 
--I have also tried to simply copy the mbedtls folder from this repo's components to the other repo's components, but no luck
+## Building the Project
 
-# Pete's notes 3/15
+First, add the following lines to your `.bashrc`:
 
-After trying (unsuccesfully) to add aws-iot-device-sdk-embedded-c I decided to just move everything we have into this repository. I renamed the repository to reflect the move to the new SDK and restructured it to make the move easier. The changes are reflected in `endpoint-package/main/CMakeLists.txt` and builds/runs as of commit f765580da9283406d3a8c6a792d43b9f7d6047f7.
+```sh
+export PATH="$HOME/<path-to-repository>/xtensa-esp32-elf/bin:$PATH"
+
+export IDF_PATH="$HOME/<path-to-repository>/esp-idf"
+
+export PATH="$IDF_PATH/tools:$PATH"
+```
+
+This will add the esp-idf binaries and scripts to your system path. After this, you can build the project by running
+
+```sh
+idf.py -p /dev/<port> build
+```
+
+flash the firmware to the board by running 
+
+```sh
+idf.py -p /dev/<port> flash
+```
+
+and launch a serial monitor by running
+
+```sh
+idf.py -p /dev/<port> monitor
+```
+
+Note: `<port>` will most likely be `ttyUSB0` or something, you can find it by running `ls /dev` while the board is connected and disconnected and seeing which interface disappears when you disconnect.
+
+## Modifying Firmware Functionality
+
+Program execution starts in `main.c>app_main`. The interesting stuff largely happens in `analog.c` and `msg_task.c`. The `lib` directory contains functions for interacting with the e-ink display, ADC, and generating QR codes. Happy hacking!
