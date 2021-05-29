@@ -140,6 +140,16 @@ idf.py -p /dev/<port> monitor
 
 Note: `<port>` will most likely be `ttyUSB0` or something, you can find it by running `ls /dev` while the board is connected and disconnected and seeing which interface disappears when you disconnect.
 
+## Testing
+
+At this point, after building and flashing the endpoint firmware, you should be able to log on the the AWS Console, navigate to `IoT Core>Test>MQTT test client`, and see the uploaded messages by subscribing to `device/+/data`.
+
+### Troubleshooting
+
+```c
+// TODO
+```
+
 ## Modifying Firmware Functionality
 
 Program execution starts in `main.c>app_main`. The interesting stuff largely happens in `analog.c` and `msg_task.c`. The `lib` directory contains functions for interacting with the e-ink display, ADC, and generating QR codes. Happy hacking!
