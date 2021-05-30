@@ -12,7 +12,20 @@ You should go through these four links in order and follow the setup isntruction
 
 ## Hardware
 
-This firmware targets the ESP32 Devkit-C V1 development board. It should be fairly easy to configure the project for a different development board or a later ESP32 MCU such as the ESP32-S2 or the ESP32-C3.
+This firmware targets the ESP32 Devkit-C V1 development board. It should be fairly easy to configure the project for a different development board or a later ESP32 MCU such as the ESP32-S2 or the ESP32-C3. The project also uses a 4.2in eInk display for showing device status and device QR code. The required connections are given below:
+
+| GPIO Pin | Connection |
+| -------- | ---------- |
+| 34 | Analog Channel 0 |
+| 35 | Analog Channel 1 |
+| 32 | Analog Channel 2 |
+| 33 | Analog Channel 3 |
+| 23 | eInk Data In |
+| 18 | eInk SPI Clock |
+| 5 | eInk SPI Chip Select |
+| 17 | eInk SPI Data/Command |
+| 16 | eInk Reset |
+| 4 | eInk Busy |
 
 ## Setting up the Project
 
