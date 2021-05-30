@@ -12,7 +12,7 @@ You should go through these four links in order and follow the setup isntruction
 
 ## Hardware
 
-This firmware targets the ESP32 Devkit-C V1 development board. It should be fairly easy to configure the project for a different development board or a later ESP32 MCU such as the ESP32-S2 or the ESP32-C3. The project also uses a 4.2in eInk display for showing device status and device QR code. The required connections are given below:
+This firmware targets the ESP32 development board ([Amazon Link](https://www.amazon.com/Xiuxin-Development-Dual-Mode-Bluetooth-Antenna/dp/B079PVCF2G/ref=sr_1_6?dchild=1&keywords=esp32&qid=1622337939&s=electronics&sr=1-6)). It should be fairly easy to configure the project for a different development board or a later ESP32 MCU such as the ESP32-S2 or the ESP32-C3. The project also uses a 4.2in eInk display ([Amazon Link](https://www.amazon.com/4-2inch-Module-Communicating-Resolution-Controller/dp/B074NR1SW2/ref=sr_1_3?dchild=1&keywords=4.2+in+eink&qid=1622338044&s=electronics&sr=1-3)) for showing device status and device QR code. The required connections are given below:
 
 | GPIO Pin | Connection |
 | -------- | ---------- |
