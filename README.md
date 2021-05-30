@@ -5,7 +5,7 @@ This repository contains the firmware for the IoT-Robotics Integration project. 
 
 1. [`iort_endpoint`](https://github.com/PaperFanz/iort_endpoint) - this repository
 2. [`insitu`](https://github.com/PaperFanz/insitu) - open source situational awareness package with extension support
-3. [`iort_lib`](https://github.com/PaperFanz/iort_filters) - a ROS library that wraps calls to a web API for fetching IoT data from AWS Timestream
+3. [`iort_lib`](https://github.com/PaperFanz/iort_lib) - a ROS library that wraps calls to a web API for fetching IoT data from AWS Timestream
 4. [`iort_filters`](https://github.com/PaperFanz/iort_filters) - example `insitu` extensions using `iort_lib` to construct real time data overlays
 
 You should go through these four links in order and follow the setup isntructions in `README.md`.
