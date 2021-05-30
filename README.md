@@ -1,7 +1,11 @@
 
 # Endpoint Firmware
 
-This repository contains the firmware for the IoT-Robotics Integration project. It is built around the [Amazon Web Services IoT Device SDK for Embedded C](https://github.com/aws/aws-iot-device-sdk-embedded-C) and [esp-idf](). The main files for the project can be found under `endpoint-package/main`.
+This repository contains the firmware for the IoT-Robotics Integration project. It is built around [Amazon FreeRTOS](https://github.com/aws/amazon-freertos), [Amazon Web Services IoT Device SDK for Embedded C](https://github.com/aws/aws-iot-device-sdk-embedded-C), and [esp-idf](https://github.com/espressif/esp-idf). The main files for the project can be found under `endpoint-package/main`.
+
+## Hardware
+
+This firmware targets the ESP32 Devkit-C V1 development board. It should be fairly easy to configure the project for a different development board or a later ESP32 MCU such as the ESP32-S2 or the ESP32-C3.
 
 ## Setting up the Project
 
@@ -110,7 +114,13 @@ See `analog.h` for full details on how these can be used to alter the behavior o
 
 ## Building the Project
 
-First, add the following lines to your `.bashrc`:
+First, clone the repository to your machine:
+
+```sh
+git clone --recursive https://github.com/PaperFanz/iort_endpoint
+```
+
+and add the following lines to your `.bashrc`:
 
 ```sh
 export PATH="$HOME/<path-to-repository>/xtensa-esp32-elf/bin:$PATH"
@@ -120,7 +130,7 @@ export IDF_PATH="$HOME/<path-to-repository>/esp-idf"
 export PATH="$IDF_PATH/tools:$PATH"
 ```
 
-This will add the esp-idf binaries and scripts to your system path. After this, you can build the project by running
+This will add the esp-idf binaries and scripts to your system path. After re-sourcing your `.bashrc`, you can build the project by running
 
 ```sh
 idf.py -p /dev/<port> build
